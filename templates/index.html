@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PustakaMuda - Search Engine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .search-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .skor {
+            color: green;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .judul {
+            font-size: 1.2em;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .sinopsis {
+            color: #666;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="search-box">
+        <h1>📚 PustakaMuda</h1>
+        <p>Sistem Temu Kembali Informasi Buku Novel</p>
+        <form method="POST">
+            <input type="text" name="keyword" placeholder="Masukkan tema atau alur cerita..." value="{{ query }}"
+                required>
+            <button type="submit">Cari</button>
+        </form>
+    </div>
+
+    {% if hasil %}
+    <h3>Hasil Pencarian untuk "{{ query }}":</h3>
+    {% for r in hasil %}
+    <div class="result-item">
+        <a href="{{ r.url }}" class="judul" target="_blank">{{ r.judul }}</a>
+        <div class="skor">Relevansi: {{ (r.skor * 100) }}%</div>
+        <div class="sinopsis">{{ r.sinopsis[:200] }}...</div>
+    </div>
+    {% endfor %}
+    {% elif query %}
+    <p>Tidak ada hasil yang ditemukan untuk "{{ query }}".</p>
+    {% endif %}
+</body>
+
+</html>
