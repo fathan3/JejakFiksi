@@ -35,32 +35,76 @@ def cosine_similarity(vec_a, vec_b):
     if norm_a == 0 or norm_b == 0: return 0
     return dot_product / (math.sqrt(norm_a) * math.sqrt(norm_b))
 
+def hitung_bm25_params(dataset):
+    n_dokumen = len(dataset)
+    docs_tokens = [preprocess(d['sinopsis']) for d in dataset]
+    
+    doc_lengths = [len(doc) for doc in docs_tokens]
+    avgdl = sum(doc_lengths) / n_dokumen if n_dokumen > 0 else 1
+    
+    df_counts = {}
+    for doc in docs_tokens:
+        for kata in set(doc):
+            df_counts[kata] = df_counts.get(kata, 0) + 1
+            
+    idf_bm25 = {}
+    for kata, n_q in df_counts.items():
+        idf_bm25[kata] = math.log(((n_dokumen - n_q + 0.5) / (n_q + 0.5)) + 1.0)
+        
+    return docs_tokens, doc_lengths, avgdl, idf_bm25
+
+def bm25_score(query_tokens, doc_tokens, doc_len, avgdl, idf_bm25, k1=1.5, b=0.75):
+    score = 0.0
+    for q in query_tokens:
+        if q in idf_bm25:
+            f_q_D = doc_tokens.count(q)
+            if f_q_D > 0:
+                numerator = f_q_D * (k1 + 1)
+                denominator = f_q_D + k1 * (1 - b + b * (doc_len / avgdl))
+                score += idf_bm25[q] * (numerator / denominator)
+    return score
+
 with open('dataset_final_search_engine (1).json', 'r', encoding='utf-8') as f:
     dataset = json.load(f)
 vocab, idf_map, vektor_dokumen = hitung_tfidf_manual(dataset)
+docs_tokens, doc_lengths, avgdl, idf_bm25 = hitung_bm25_params(dataset)
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     query = ""
     hasil = []
+    metode = 'cosine'
     if request.method == 'POST':
         query = request.form.get('keyword')
+        metode = request.form.get('metode', 'cosine')
         query_tokens = preprocess(query)
-        vektor_query = [query_tokens.count(kata) * idf_map.get(kata, 0) for kata in vocab]
         
-        for i in range(len(vektor_dokumen)):
-            skor = cosine_similarity(vektor_query, vektor_dokumen[i])
-            if skor > 0:
-                hasil.append({
-                    "judul": dataset[i]['judul'],
-                    "sinopsis": dataset[i]['sinopsis'],
-                    "skor": round(skor, 4),
-                    "url": dataset[i]['url']
-                })
+        if metode == 'cosine':
+            vektor_query = [query_tokens.count(kata) * idf_map.get(kata, 0) for kata in vocab]
+            for i in range(len(vektor_dokumen)):
+                skor = cosine_similarity(vektor_query, vektor_dokumen[i])
+                if skor > 0:
+                    hasil.append({
+                        "judul": dataset[i]['judul'],
+                        "sinopsis": dataset[i]['sinopsis'],
+                        "skor": round(skor, 4),
+                        "url": dataset[i]['url']
+                    })
+        elif metode == 'bm25':
+            for i in range(len(dataset)):
+                skor = bm25_score(query_tokens, docs_tokens[i], doc_lengths[i], avgdl, idf_bm25)
+                if skor > 0:
+                    hasil.append({
+                        "judul": dataset[i]['judul'],
+                        "sinopsis": dataset[i]['sinopsis'],
+                        "skor": round(skor, 4),
+                        "url": dataset[i]['url']
+                    })
+                    
         hasil = sorted(hasil, key=lambda x: x['skor'], reverse=True)
 
-    return render_template('index.html', query=query, hasil=hasil)
+    return render_template('index.html', query=query, hasil=hasil, metode=metode)
 
 if __name__ == '__main__':
     app.run(debug=True)

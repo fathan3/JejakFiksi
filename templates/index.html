@@ -3,89 +3,399 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>PustakaMuda - Search Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PustakaMuda - Premium Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --success: #10b981;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            background-color: #f4f4f9;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            line-height: 1.6;
         }
 
-        .search-box {
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
-        input[type="text"] {
-            width: 70%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        .header h1 {
+            font-size: 3.5rem;
+            margin: 0;
+            font-weight: 800;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
         }
 
-        button {
-            padding: 10px 20px;
-            background: #007bff;
+        .header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .search-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-container:focus-within {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.45);
+        }
+
+        .search-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 24px;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        .search-input::placeholder {
+            color: #64748b;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .select-wrapper {
+            position: relative;
+            min-width: 180px;
+        }
+
+        .method-select {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .method-select:focus {
+            border-color: var(--accent);
+        }
+
+        .method-select option {
+            background: #1e293b;
+            color: var(--text-primary);
+        }
+
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 0.8rem;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-btn {
+            padding: 18px 36px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: var(--accent);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
 
-        .result-item {
-            background: white;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .search-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
 
-        .skor {
-            color: green;
-            font-weight: bold;
-            font-size: 0.9em;
+        .search-btn:active {
+            transform: translateY(0);
         }
 
-        .judul {
-            font-size: 1.2em;
-            color: #333;
+        .results-header {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            animation: fadeIn 1s ease-out;
+        }
+
+        .result-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: slideInUp 0.6s ease-out backwards;
+        }
+
+        /* Staggered animation for results */
+        .result-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .result-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .result-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .result-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .result-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-title {
+            display: block;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #818cf8;
             text-decoration: none;
-            font-weight: bold;
+            margin-bottom: 10px;
+            transition: color 0.2s ease;
         }
 
-        .sinopsis {
-            color: #666;
-            font-size: 0.95em;
-            margin-top: 5px;
+        .result-title:hover {
+            color: #c084fc;
+        }
+
+        .result-meta {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .result-snippet {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            background: var(--glass-bg);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .search-form {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .search-btn,
+            .method-select,
+            .search-input {
+                width: 100%;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="search-box">
-        <h1>📚 PustakaMuda</h1>
-        <p>Sistem Temu Kembali Informasi Buku Novel</p>
-        <form method="POST">
-            <input type="text" name="keyword" placeholder="Masukkan tema atau alur cerita..." value="{{ query }}"
-                required>
-            <button type="submit">Cari</button>
-        </form>
-    </div>
+    <div class="container">
+        <header class="header">
+            <h1>PustakaMuda</h1>
+            <p>Sistem Temu Kembali Informasi Buku Novel Modern</p>
+        </header>
 
-    {% if hasil %}
-    <h3>Hasil Pencarian untuk "{{ query }}":</h3>
-    {% for r in hasil %}
-    <div class="result-item">
-        <a href="{{ r.url }}" class="judul" target="_blank">{{ r.judul }}</a>
-        <div class="skor">Relevansi: {{ (r.skor * 100) }}%</div>
-        <div class="sinopsis">{{ r.sinopsis[:200] }}...</div>
+        <div class="search-container">
+            <form method="POST" class="search-form">
+                <div class="search-input-wrapper">
+                    <input type="text" name="keyword" class="search-input"
+                        placeholder="Masukkan tema, genre, atau alur cerita..." value="{{ query }}" required>
+                </div>
+                <div class="select-wrapper">
+                    <select name="metode" class="method-select">
+                        <option value="cosine" {% if metode=='cosine' %}selected{% endif %}>Cosine Similarity</option>
+                        <option value="bm25" {% if metode=='bm25' %}selected{% endif %}>BM25</option>
+                    </select>
+                </div>
+                <button type="submit" class="search-btn">Eksplorasi</button>
+            </form>
+        </div>
+
+        {% if hasil %}
+        <div class="results-header">
+            Ditemukan {{ hasil|length }} hasil untuk "{{ query }}"
+        </div>
+
+        <div class="results-list">
+            {% for r in hasil %}
+            <div class="result-card">
+                <a href="{{ r.url }}" class="result-title" target="_blank">{{ r.judul }}</a>
+                <div class="result-meta">
+                    {% if metode == 'cosine' %}
+                    <svg style="width: 16px; height: 16px; margin-right: 6px;" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Relevansi: {{ (r.skor * 100)|round(2) }}%
+                    {% else %}
+                    <svg style="width: 16px; height: 16px; margin-right: 6px;" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                        </path>
+                    </svg>
+                    Skor BM25: {{ r.skor|round(4) }}
+                    {% endif %}
+                </div>
+                <div class="result-snippet">{{ r.sinopsis[:250] }}...</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif query %}
+        <div class="no-results">
+            <svg style="width: 64px; height: 64px; margin: 0 auto 15px; color: #475569;" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p>Tidak ada hasil yang relevan untuk <strong>"{{ query }}"</strong>.</p>
+            <p style="font-size: 0.95rem; margin-top: 5px;">Coba gunakan kata kunci lain atau ubah metode pencarian.</p>
+        </div>
+        {% endif %}
     </div>
-    {% endfor %}
-    {% elif query %}
-    <p>Tidak ada hasil yang ditemukan untuk "{{ query }}".</p>
-    {% endif %}
 </body>
 
 </html>
