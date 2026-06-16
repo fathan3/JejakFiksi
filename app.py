@@ -73,38 +73,39 @@ docs_tokens, doc_lengths, avgdl, idf_bm25 = hitung_bm25_params(dataset)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     query = ""
-    hasil = []
-    metode = 'cosine'
+    hasil_cosine = []
+    hasil_bm25 = []
     if request.method == 'POST':
         query = request.form.get('keyword')
-        metode = request.form.get('metode', 'cosine')
         query_tokens = preprocess(query)
         
-        if metode == 'cosine':
-            vektor_query = [query_tokens.count(kata) * idf_map.get(kata, 0) for kata in vocab]
-            for i in range(len(vektor_dokumen)):
-                skor = cosine_similarity(vektor_query, vektor_dokumen[i])
-                if skor > 0:
-                    hasil.append({
-                        "judul": dataset[i]['judul'],
-                        "sinopsis": dataset[i]['sinopsis'],
-                        "skor": round(skor, 4),
-                        "url": dataset[i]['url']
-                    })
-        elif metode == 'bm25':
-            for i in range(len(dataset)):
-                skor = bm25_score(query_tokens, docs_tokens[i], doc_lengths[i], avgdl, idf_bm25)
-                if skor > 0:
-                    hasil.append({
-                        "judul": dataset[i]['judul'],
-                        "sinopsis": dataset[i]['sinopsis'],
-                        "skor": round(skor, 4),
-                        "url": dataset[i]['url']
-                    })
+        # Calculate Cosine Similarity
+        vektor_query = [query_tokens.count(kata) * idf_map.get(kata, 0) for kata in vocab]
+        for i in range(len(vektor_dokumen)):
+            skor = cosine_similarity(vektor_query, vektor_dokumen[i])
+            if skor > 0:
+                hasil_cosine.append({
+                    "judul": dataset[i]['judul'],
+                    "sinopsis": dataset[i]['sinopsis'],
+                    "skor": round(skor, 4),
+                    "url": dataset[i]['url']
+                })
+                
+        # Calculate BM25
+        for i in range(len(dataset)):
+            skor = bm25_score(query_tokens, docs_tokens[i], doc_lengths[i], avgdl, idf_bm25)
+            if skor > 0:
+                hasil_bm25.append({
+                    "judul": dataset[i]['judul'],
+                    "sinopsis": dataset[i]['sinopsis'],
+                    "skor": round(skor, 4),
+                    "url": dataset[i]['url']
+                })
                     
-        hasil = sorted(hasil, key=lambda x: x['skor'], reverse=True)
+        hasil_cosine = sorted(hasil_cosine, key=lambda x: x['skor'], reverse=True)[:10]
+        hasil_bm25 = sorted(hasil_bm25, key=lambda x: x['skor'], reverse=True)[:10]
 
-    return render_template('index.html', query=query, hasil=hasil, metode=metode)
+    return render_template('index.html', query=query, hasil_cosine=hasil_cosine, hasil_bm25=hasil_bm25)
 
 if __name__ == '__main__':
     app.run(debug=True)
