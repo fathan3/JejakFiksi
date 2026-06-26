@@ -326,59 +326,49 @@
                     <input type="text" name="keyword" class="search-input"
                         placeholder="Masukkan tema, genre, atau alur cerita..." value="{{ query }}" required>
                 </div>
+                <div class="select-wrapper">
+                    <select name="method" class="method-select">
+                        <option value="cosine" {% if method == 'cosine' %}selected{% endif %}>Cosine Similarity</option>
+                        <option value="bm25" {% if method == 'bm25' %}selected{% endif %}>BM25</option>
+                    </select>
+                </div>
                 <button type="submit" class="search-btn">Eksplorasi</button>
             </form>
         </div>
 
         {% if query and (hasil_cosine or hasil_bm25) %}
         <div class="results-header" style="text-align: center; margin-bottom: 30px;">
-            Hasil pencarian untuk "<strong>{{ query }}</strong>"
+            Hasil pencarian untuk "<strong>{{ query }}</strong>" menggunakan {% if method == 'cosine' %}Cosine Similarity{% else %}BM25{% endif %}
         </div>
 
-        <div class="results-container">
-            <!-- Kolom Cosine -->
-            <div class="method-column">
-                <div class="method-column-title">Cosine Similarity</div>
-                <div class="results-list">
-                    {% for r in hasil_cosine %}
-                    <div class="result-card">
-                        <a href="{{ r.url }}" class="result-title" target="_blank">{{ r.judul }}</a>
-                        <div class="result-meta cosine">
-                            <svg style="width: 14px; height: 14px; margin-right: 5px; stroke-width: 2.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            Relevansi: {{ (r.skor * 100)|round(2) }}%
-                        </div>
-                        <div class="result-snippet">{{ r.sinopsis[:250] }}...</div>
+        <div class="results-list">
+            {% if method == 'cosine' %}
+                {% for r in hasil_cosine %}
+                <div class="result-card">
+                    <a href="{{ r.url }}" class="result-title" target="_blank">{{ r.judul }}</a>
+                    <div class="result-meta cosine">
+                        <svg style="width: 14px; height: 14px; margin-right: 5px; stroke-width: 2.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Relevansi: {{ (r.skor * 100)|round(2) }}%
                     </div>
-                    {% endfor %}
-                    {% if not hasil_cosine %}
-                    <div class="no-results" style="padding: 24px;">Tidak ada hasil</div>
-                    {% endif %}
+                    <div class="result-snippet">{{ r.sinopsis[:250] }}...</div>
                 </div>
-            </div>
-
-            <!-- Kolom BM25 -->
-            <div class="method-column">
-                <div class="method-column-title">BM25</div>
-                <div class="results-list">
-                    {% for r in hasil_bm25 %}
-                    <div class="result-card">
-                        <a href="{{ r.url }}" class="result-title" target="_blank">{{ r.judul }}</a>
-                        <div class="result-meta bm25">
-                            <svg style="width: 14px; height: 14px; margin-right: 5px; stroke-width: 2.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                            Skor: {{ r.skor|round(4) }}
-                        </div>
-                        <div class="result-snippet">{{ r.sinopsis[:250] }}...</div>
+                {% endfor %}
+            {% elif method == 'bm25' %}
+                {% for r in hasil_bm25 %}
+                <div class="result-card">
+                    <a href="{{ r.url }}" class="result-title" target="_blank">{{ r.judul }}</a>
+                    <div class="result-meta bm25">
+                        <svg style="width: 14px; height: 14px; margin-right: 5px; stroke-width: 2.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Skor: {{ r.skor|round(4) }}
                     </div>
-                    {% endfor %}
-                    {% if not hasil_bm25 %}
-                    <div class="no-results" style="padding: 24px;">Tidak ada hasil</div>
-                    {% endif %}
+                    <div class="result-snippet">{{ r.sinopsis[:250] }}...</div>
                 </div>
-            </div>
+                {% endfor %}
+            {% endif %}
         </div>
         {% elif query %}
         <div class="no-results">
